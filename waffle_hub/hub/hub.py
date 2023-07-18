@@ -62,7 +62,8 @@ class Hub:
     BACKEND_NAME = None
     MODEL_TYPES = None
     MULTI_GPU_TRAIN = None
-    DEFAULT_PARAMS = None
+    DEFAULT_TRAIN_PARAMS = None
+    DEFAULT_EVAL_PARAMS = None
 
     # directory settings
     DEFAULT_HUB_ROOT_DIR = Path("./hubs")
@@ -115,8 +116,8 @@ class Hub:
         if self.MULTI_GPU_TRAIN is None:
             raise AttributeError("MULTI_GPU_TRAIN must be specified.")
 
-        if self.DEFAULT_PARAMS is None:
-            raise AttributeError("DEFAULT_PARAMS must be specified.")
+        if self.DEFAULT_TRAIN_PARAMS is None:
+            raise AttributeError("DEFAULT_TRAIN_PARAMS must be specified.")
 
         self.name: str = name
         self.task: str = task
@@ -234,7 +235,7 @@ class Hub:
     @classmethod
     def get_default_train_params(
         cls, backend: str = None, task: str = None, model_type: str = None, model_size: str = None
-    ) -> dict:
+    ) -> TrainConfig:
         """
         Get default train params
 
@@ -248,7 +249,7 @@ class Hub:
             ModuleNotFoundError: If backend is not supported
 
         Returns:
-            dict: Default train params
+            TrainConfig: Default train params
         """
         backend = backend if backend else cls.BACKEND_NAME
         hub = cls.get_hub_class(backend)
@@ -258,7 +259,29 @@ class Hub:
             raise ValueError(f"{model_type} is not supported with {backend}")
         if model_size not in hub.MODEL_TYPES[task][model_type]:
             raise ValueError(f"{model_size} is not supported with {backend}")
-        return hub.DEFAULT_PARAMS[task][model_type][model_size]
+        return hub.DEFAULT_TRAIN_PARAMS[task][model_type][model_size]
+
+    @classmethod
+    def get_default_eval_params(
+        cls,
+        backend: str = None,
+        task: str = None,
+    ) -> EvaluateConfig:
+        """
+        Get default eval params
+
+        Args:
+            backend (str): Backend name
+            task (str): Task name
+
+        Returns:
+            EvaluateConfig: Default eval params
+        """
+        backend = backend if backend else cls.BACKEND_NAME
+        hub = cls.get_hub_class(backend)
+        if task not in hub.MODEL_TYPES:
+            raise ValueError(f"{task} is not supported with {backend}")
+        return hub.DEFAULT_EVAL_PARAMS[task]
 
     @classmethod
     def new(
@@ -997,7 +1020,7 @@ class Hub:
         for k, v in cfg.to_dict().items():
             if v is None:
                 field_value = getattr(
-                    self.DEFAULT_PARAMS[self.task][self.model_type][self.model_size], k
+                    self.DEFAULT_TRAIN_PARAMS[self.task][self.model_type][self.model_size], k
                 )
                 setattr(cfg, k, field_value)
 
@@ -1197,15 +1220,18 @@ class Hub:
             else:
                 raise FileNotFoundError(f"Dataset {dataset} is not exist.")
 
+        backend_cfg = Hub.get_default_eval_params(backend=self.backend, task=self.task)
         cfg = EvaluateConfig(
             dataset_name=dataset.name,
             set_name=set_name,
             batch_size=batch_size,
             image_size=image_size,
             letter_box=letter_box,
-            confidence_threshold=confidence_threshold,
-            iou_threshold=iou_threshold,
-            half=half,
+            confidence_threshold=confidence_threshold
+            if confidence_threshold
+            else backend_cfg.confidence_threshold,
+            iou_threshold=iou_threshold if iou_threshold else backend_cfg.iou_threshold,
+            half=half if half else backend_cfg.half,
             workers=workers,
             device="cpu" if device == "cpu" else f"cuda:{device}",
             draw=draw,

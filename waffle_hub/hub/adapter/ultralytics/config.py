@@ -1,5 +1,5 @@
 from waffle_hub import TaskType
-from waffle_hub.schema.configs import TrainConfig
+from waffle_hub.schema.configs import EvaluateConfig, TrainConfig
 
 # Common
 MODEL_TYPES = {
@@ -53,7 +53,7 @@ TASK_MAP = {
     # "keypoint_detection": "pose"
 }
 
-DEFAULT_PARAMS = {
+DEFAULT_TRAIN_PARAMS = {
     TaskType.OBJECT_DETECTION: {
         "yolov8": {
             "n": TrainConfig(
@@ -243,4 +243,20 @@ DEFAULT_PARAMS = {
             ),
         }
     },
+}
+
+
+DEFAULT_EVAL_PARAMS = {
+    TaskType.OBJECT_DETECTION: EvaluateConfig(
+        confidence_threshold=0.25,
+        iou_threshold=0.7,
+    ),
+    TaskType.CLASSIFICATION: EvaluateConfig(
+        confidence_threshold=0.25,
+        iou_threshold=0.7,
+    ),
+    TaskType.INSTANCE_SEGMENTATION: EvaluateConfig(
+        confidence_threshold=0.25,
+        iou_threshold=0.7,
+    ),
 }

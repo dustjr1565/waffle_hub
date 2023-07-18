@@ -21,14 +21,15 @@ from waffle_hub.schema.configs import TrainConfig
 from waffle_hub.utils.callback import TrainCallback
 from waffle_hub.utils.process import run_python_file
 
-from .config import DEFAULT_PARAMS, MODEL_TYPES, TASK_MAP
+from .config import DEFAULT_EVAL_PARAMS, DEFAULT_TRAIN_PARAMS, MODEL_TYPES, TASK_MAP
 
 
 class UltralyticsHub(Hub):
     BACKEND_NAME = "ultralytics"
     MODEL_TYPES = MODEL_TYPES
     MULTI_GPU_TRAIN = True
-    DEFAULT_PARAMS = DEFAULT_PARAMS
+    DEFAULT_TRAIN_PARAMS = DEFAULT_TRAIN_PARAMS
+    DEFAULT_EVAL_PARAMS = DEFAULT_EVAL_PARAMS
     DEFAULT_ADVANCE_PARAMS = dict(YOLO_DEFAULT_ADVANCE_PARAMS)
 
     TASK_MAP = TASK_MAP

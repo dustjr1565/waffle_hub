@@ -5,7 +5,6 @@ from typing import Union
 import torch
 from torchmetrics.classification import Accuracy
 from torchmetrics.detection import mean_ap
-from torchmetrics.text import CharErrorRate
 
 from waffle_hub import TaskType
 from waffle_hub.schema.evaluate import (
@@ -91,11 +90,10 @@ def evaluate_object_detection(
     map_dict = mean_ap.MeanAveragePrecision(
         box_format="xywh",
         iou_type="bbox",
-        class_metrics=True,
         num_classes=num_classes,
     )(preds, labels)
 
-    return ObjectDetectionMetric(float(map_dict["map"]))
+    return ObjectDetectionMetric(float(map_dict["map"]), float(map_dict["map_50"]))
 
 
 def evaluate_segmentation(
@@ -109,7 +107,7 @@ def evaluate_segmentation(
         num_classes=num_classes,
     )(preds, labels)
 
-    return InstanceSegmentationMetric(float(map_dict["map"]))
+    return InstanceSegmentationMetric(float(map_dict["map"]), float(map_dict["map_50"]))
 
 
 def evalute_text_recognition(

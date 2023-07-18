@@ -5,7 +5,8 @@ from waffle_hub.schema.base_schema import BaseSchema
 
 @dataclass
 class ObjectDetectionMetric(BaseSchema):
-    mAP: float
+    mAP50_95: float
+    mAP50: float
 
 
 @dataclass
@@ -15,7 +16,8 @@ class ClassificationMetric(BaseSchema):
 
 @dataclass
 class InstanceSegmentationMetric(BaseSchema):
-    mAP: float
+    mAP50_95: float
+    mAP50: float
 
 
 @dataclass
